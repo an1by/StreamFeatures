@@ -1,0 +1,22 @@
+{
+  "author": {
+    "label": "An1by",
+    "type": "dropdown",
+    "value": "site",
+    "options": {
+      "site": "aniby.net",
+      "x": "x.com/an1by",
+      "vk": "vk.com/an1by",
+      "github": "github.com/an1by"
+    },
+    "group": "Author / Автор"
+  },
+  "widgetName": {
+    "type": "hidden",
+    "value": "Widget by An1by (aniby.net)"
+  },
+  "widgetAuthor": {
+    "type": "hidden",
+    "value": "An1by (aniby.net)"
+  }
+}
