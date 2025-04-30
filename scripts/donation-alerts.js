@@ -1,23 +1,36 @@
+/*
+Данный продукт использует компоненты кода и сервис "st.aniby.net", разработанный "An1by" (https://aniby.net/).
+Оригинальный репозиторий: https://github.com/an1by/StreamFeatures
+ */
 class DonationAlerts {
-    constructor() {
+    constructor(userToken, host = "https://st.aniby.net/") {
+        this.userToken = userToken;
+
+        const url = new URL(host);
+        this.host = `${url.protocol}//${url.hostname}`;
+        if (url.port !== "") this.host += `:${url.port}`;
+
         this.accessToken = null;
         this.userId = null;
         this.centrifuge = null;
     }
 
-    init = async (widgetToken, oauthToken) => {
+    init = async () => {
         if (this.centrifuge) {
             this.centrifuge.disconnect();
         }
 
         // Widget API
-        this.accessToken = await this._getApiTokenFromWidgetToken(widgetToken);
+        this.accessToken = await this._getAccessToken(this.userToken);
 
         // OAuth API
-        const {id, socket_connection_token} = await this._getDonationUserInfo(oauthToken);
+        const {id, socket_connection_token} = await this._getDonationUserInfo();
         this.userId = id;
 
         const {endpoint} = await this._getCentrifugeConfig();
+        /*
+        This part of code taken from https://github.com/StimulCross/donation-alerts
+         */
         this.centrifuge = new Centrifuge(
             endpoint,
             {
@@ -29,9 +42,7 @@ class DonationAlerts {
                 onPrivateSubscribe: (ctx, callback) => {
                     this._subscribeRequest(ctx.data.channels, ctx.data.client)
                         .then(response => response.json())
-                        // .then(response => response.channels)
                         .then(data => {
-                            console.log(data)
                             const channels = data.channels
                             callback({
                                 status: 200,
@@ -51,22 +62,22 @@ class DonationAlerts {
         this.centrifuge.connect();
     }
 
-    subscribeRoulette = () => {
-        const channel = `$widgets:roulette_widgets_${this.userId}`
-        this.centrifuge.subscribe(channel, ({data}) => {
-            if (data.event !== "goal-state-update") {
-                return;
-            }
-            const eventData = data.eventData;
-            const state = eventData.rollingState;
-            if (!state || state !== "result") {
-                return;
-            }
-
-            Config.expressWebsocket.getWss().clients.forEach((client) => {
-                client.send(JSON.stringify(eventData))
-            })
+    subscribeGoals = (action) => {
+        this.centrifuge.subscribe(`$goal:goal_${this.userId}`, ({data}) => {
+            action(data);
         });
+    }
+
+    subscribeRoulette = (action) => {
+        this.centrifuge.subscribe(`$widgets:roulette_widgets_${this.userId}`, ({data}) => {
+            action(data);
+        });
+    }
+
+    _getDonationUserInfo = async () => {
+        const response = await fetch(`${this.host}/da/user/widget?access_token=${this.accessToken}`);
+        const data = await response.json();
+        return data.data;
     }
 
     _getCentrifugeConfig = async () => {
@@ -75,15 +86,16 @@ class DonationAlerts {
         return data.data.centrifugo;
     }
 
-    _getDonationUserInfo = async (accessToken) => {
-        const response = await fetch("https://www.donationalerts.com/api/v1/user/oauth", {
-            headers: {
-                Authorization: `Bearer ${accessToken}`
-            }
+    _getAccessToken = async (token) => {
+        const url = "https://www.donationalerts.com/api/v1/token/widget?" + new URLSearchParams({
+            token
+        }).toString();
+
+        const response = await fetch(url, {
+            method: "GET"
         });
         const data = await response.json();
-        console.log(data);
-        return data.data;
+        return data.data.token;
     }
 
     _subscribeRequest = (channels, clientId) => {
@@ -98,8 +110,6 @@ class DonationAlerts {
             client: clientId,
         };
 
-        console.log(body)
-
         return fetch(url, {
             method: 'POST',
             headers,
@@ -107,15 +117,4 @@ class DonationAlerts {
         });
     }
 
-    _getApiTokenFromWidgetToken = async (token) => {
-        const url = "https://www.donationalerts.com/api/v1/token/widget?" + new URLSearchParams({
-            token
-        }).toString();
-
-        const response = await fetch(url, {
-            method: "GET"
-        });
-        const data = await response.json();
-        return data.data.token;
-    }
 }

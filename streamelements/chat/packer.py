@@ -1,6 +1,6 @@
 import zipfile
 
-name = "mizumitanuki"
+name = "an1by"
 
 zip_path = f"./{name}_chat.zip"
 
