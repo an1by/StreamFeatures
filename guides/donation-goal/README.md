@@ -67,38 +67,44 @@ let lastRaisedAmount = 0;
 let goalId = "1234567";
 
 window.addEventListener("onWidgetLoad", async (initData) => {
-   const widgetSettings = initData.detail.fieldData;
-   const widgetUrl = widgetSettings["daWidgetUrl"];
-   
-   const userToken = extractToken(widgetUrl);
-   goalId = extractGoalId(widgetUrl);
-    
-   const donationAlerts = new DonationAlerts(userToken);
-   await donationAlerts.init();
-   
-   const initialGoalData = await donationAlerts.getGoalData(goalId);
-   onGoal(initialGoalData);
-   donationAlerts.subscribeGoals(onGoal);
+    const widgetSettings = initData.detail.fieldData;
+    const widgetUrl = widgetSettings["daWidgetUrl"];
+
+    const userToken = sfutils.extractToken(widgetUrl);
+    goalId = sfutils.extractGoalId(widgetUrl);
+
+    const donationAlerts = new DonationAlerts(userToken);
+    await donationAlerts.init();
+
+    const initialGoalData = await donationAlerts.getGoalData(goalId);
+    onGoal(initialGoalData);
+    donationAlerts.subscribeGoals(onGoal);
 });
 
 const onGoal = (data) => {
-   if (data.id !== goalId || data.raised_amount === lastRaisedAmount) {
-      return;
-   }
-   this.lastRaisedAmount = data.raised_amount;
+    if (data.id !== goalId || data.raised_amount === lastRaisedAmount) {
+        return;
+    }
+    lastRaisedAmount = data.raised_amount;
 
-   animateChanges(data);
+    animateChanges(data);
 }
 
 const animateChanges = (data) => {
-   const newPercent = Math.min(data.raised_amount / data.goal_amount, 1);
-   $(".goal").css("--goal-fill", `${newPercent}`); // Браузер сам анимирует, если стоит transition
+    const newPercent = Math.min(data.raised_amount / data.goal_amount, 1);
+    $(".goal").css("--goal-fill", `${newPercent}`); // Браузер сам анимирует, если стоит transition
 }
 ```
 
-Это практически конец всего кода именно по части JavaScript'а.
-Дополнительно вам нужно будет
+> Импортирование `sfutils` в `.html`:
+> ```html
+>  <script type="text/javascript" src="https://raw.githubusercontent.com/an1by/StreamFeatures/refs/heads/master/libs/sfutils/sfutils.umd.min.js"></script>
+> ```
 
+Это конец всего кода именно по части JavaScript'а.
+Если хотите добавить что-то еще - дерзайте, никто вас не ограничивает)
+
+Далее беремся за CSS.\
 Для обрезки гоала стоит использовать маски (как для сердца, так и для волны),
 которые подготовили в дизайне. Это можно делать с помощью свойств `mask`
 и `-webkit-mask`.
@@ -107,22 +113,22 @@ const animateChanges = (data) => {
 
 ```css
 body {
-   --goal-fill: 0;
-   --mask-image: url("data:image/png;base64,...");
+    --goal-fill: 0;
+    --mask-image: url("data:image/png;base64,...");
 }
 
 .goal {
-   .inside {
-      mask: var(--mask-image);
-      -webkit-mask: var(--mask-image);
+    .inside {
+        mask: var(--mask-image);
+        -webkit-mask: var(--mask-image);
 
-      .wave {
-         width: 100%;
-         height: calc(var(--goal-fill) * 500px);
-         top: calc(400px - var(--goal-fill) * 500px);
-         transition: height 0.5s ease-in-out, top 0.5s ease-in-out;
-      }
-   }
+        .wave {
+            width: 100%;
+            height: calc(var(--goal-fill) * 500px);
+            top: calc(400px - var(--goal-fill) * 500px);
+            transition: height 0.5s ease-in-out, top 0.5s ease-in-out;
+        }
+    }
 }
 ```
 

@@ -11,7 +11,6 @@ API, с которым можно беспрепятственно взаимо�
 <a id="centrifuge"></a>
 
 ```html
-
 <script type="text/javascript" src="https://unpkg.com/centrifuge@2.8.5/dist/centrifuge.js"></script>
 ```
 
@@ -33,8 +32,9 @@ CORS при попытке обращения к DonationAlerts.\
 В виджет / браузер код работы с этим API можно экспортировать так:
 
 ```html
-<script type="text/javascript" src="https://raw.githubusercontent.com/an1by/StreamFeatures/refs/heads/master/scripts/js/donationalerts.js"></script>
+<script type="text/javascript" src="https://raw.githubusercontent.com/an1by/StreamFeatures/refs/heads/master/libs/donationalerts/donationalerts.umd.min.js"></script>
 ```
+> Разобрать код можно [здесь](/libs/donationalerts/donationalerts.js).
 
 Перед этим обязательно <a href="#centrifuge">экспортируйте Cenrifuge</a>!
 

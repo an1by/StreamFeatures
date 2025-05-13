@@ -1,7 +1,8 @@
-function parseJwt (token) {
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.sfutils = f()}})(function(){var define,module,exports;
+function parseJwt(token) {
     let base64Url = token.split('.')[1];
     let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    let jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+    let jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
 
@@ -24,3 +25,8 @@ const extractToken = (url) => {
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+return {parseJwt, extractGoalId, extractToken, sleep};
+
+});
+
