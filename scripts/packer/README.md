@@ -23,20 +23,20 @@
 ### Chat
 
 ```bash
-curl -s https://raw.githubusercontent.com/an1by/StreamFeatures/refs/heads/master/scripts/packer/chat.py | \
+curl -s https://raw.githubusercontent.com/an1by/StreamFeatures/refs/heads/master/scripts/packer/packer.py | \
 python - "CHAT_README" "клиент" "автор" "ширина" "высота"
 ```
 
 ### Donation Goal (стандарт)
 
 ```bash
-curl -s https://raw.githubusercontent.com/an1by/StreamFeatures/refs/heads/master/scripts/packer/donation_goal.py | \
+curl -s https://raw.githubusercontent.com/an1by/StreamFeatures/refs/heads/master/scripts/packer/packer.py | \
 python - "DONATION_GOAL_README" "клиент" "автор" "ширина" "высота"
 ```
 
 ### Donation Goal (st-aniby)
 
 ```bash
-curl -s https://raw.githubusercontent.com/an1by/StreamFeatures/refs/heads/master/scripts/packer/donation_goal.py | \
+curl -s https://raw.githubusercontent.com/an1by/StreamFeatures/refs/heads/master/scripts/packer/packer.py | \
 python - "DONATION_GOAL_ANIBY_README" "клиент" "автор" "ширина" "высота"
 ```
