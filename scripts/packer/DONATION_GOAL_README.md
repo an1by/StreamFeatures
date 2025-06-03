@@ -1,6 +1,6 @@
 Donation Goal сделан специально для {client} ♥
 
-Разработано: {authors}
+Разработано: {credits}
 
 1. Следуем гайду: https://youtu.be/sY1hULqQms8
    1. При создании устанавливаем размер {width} на {height}
