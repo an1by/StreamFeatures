@@ -54,13 +54,17 @@
 
 <h2 id="code">Код</h2>
 
-[/scripts/js/donationalerts.js](/scripts/js/donationalerts.js) уже поддерживает
+### JS (`st-aniby`)
+
+[donationalerts.js](/scripts/js/donationalerts.js) уже поддерживает
 все нужные функции для подписки на событие изменения Goal'а:
 `DonationAlerts::subscribeGoal`.
 
 Все, что вам нужно - регистрировать и обрабатывать этот ивент при
 загрузке виджета. Дополнительно можно добавить инициализацию подгрузку
 начальных данных.
+
+`index.js`
 
 ```js
 let lastRaisedAmount = 0;
@@ -96,13 +100,122 @@ const animateChanges = (data) => {
 }
 ```
 
-> Импортирование `sfutils` в `.html`:
-> ```html
->  <script type="text/javascript" src="https://raw.githubusercontent.com/an1by/StreamFeatures/refs/heads/master/libs/sfutils/sfutils.umd.min.js"></script>
-> ```
+`fields.json`
 
-Это конец всего кода именно по части JavaScript'а.
+```json
+{
+  "daWidgetUrl": {
+    "label": "Widget URL",
+    "type": "text",
+    "value": "",
+    "group": "Donation Alerts"
+  }
+}
+```
+
+### JS (стандартная версия)
+
+Более сложная версия предыдущего варианта, но более стабильная,
+так как не использует внешний сервис, который я могу иногда
+случайно уронить.\
+~~Или его уронит Hetzner - это уже детали.~~
+
+Здесь взаимодействие идет более интересное.
+Так как нет какой-то привязки к внешнему сервису, то клиенту
+токен для подключения к DonationAlerts придется брать ручками.
+> Гайд по этому мероприятию есть
+> [здесь](/scripts/packer/DONATION_GOAL_README.md).
+
+А также используем упрощенную версию скрипта для взаимодействия -
+[donationalerts.default.js](/libs/donationalerts/donationalerts.default.js).
+
+И, так как из-за злостных CORS мы теперь не можем брать напрямую
+данные заполняемости гоала при его подгрузке, будем сохранять последние
+данные о нем через `SE_API`.
+
+`index.js`
+
+```js
+// Должен быть уникальным. Можете сгенерировать UUID
+// https://www.uuidgenerator.net/version4
+const DONATION_GOAL_KEY = "omegaUltraAn1byGoal_1";
+
+let lastRaisedAmount = 0;
+let goalId = "1234567";
+
+window.addEventListener("onWidgetLoad", async (initData) => {
+    const widgetSettings = initData.detail.fieldData;
+    const widgetUrl = widgetSettings["daWidgetUrl"];
+    const socketConnectionToken = widgetSettings["daSocketConnectionToken"];
+
+    const userToken = extractToken(widgetUrl);
+    goalId = extractGoalId(widgetUrl);
+
+    const donationAlerts = new DonationAlerts(userToken, socketConnectionToken);
+    await donationAlerts.init();
+
+    const initialGoalData = await getGoalData();
+    if (initialGoalData) { // В самом начале - null
+       onGoal(initialGoalData);
+    }
+
+    donationAlerts.subscribeGoals(onGoal);
+});
+
+const getGoalData = async () => {
+    return SE_API.store.get(DONATION_GOAL_KEY);
+}
+
+const setGoalData = (id, raised_amount, goal_amount) => {
+    SE_API.store.set(DONATION_GOAL_KEY, {
+        id,
+        raised_amount,
+        goal_amount
+    });
+}
+
+const onGoal = (data) => {
+    if (data.id !== goalId || data.raised_amount === lastRaisedAmount) {
+        return;
+    }
+
+    setGoalData(data.id, data.raised_amount, data.goal_amount);
+    lastRaisedAmount = data.raised_amount;
+
+    animateChanges(data);
+}
+
+const animateChanges = (data) => {
+    const newPercent = Math.min(data.raised_amount / data.goal_amount, 1);
+    $(".goal").css("--goal-fill", `${newPercent}`); // Браузер сам анимирует, если стоит transition
+}
+```
+
+`fields.json`
+
+```json
+{
+  "daWidgetUrl": {
+    "label": "Widget URL",
+    "type": "text",
+    "value": "",
+    "group": "Donation Alerts"
+  },
+  "daSocketConnectionToken": {
+    "label": "Connection Token",
+    "type": "text",
+    "value": "",
+    "group": "Donation Alerts"
+  }
+}
+```
+
+---
+
+Это конец всего кода именно по части логики привязки DonationAlerts.\
 Если хотите добавить что-то еще - дерзайте, никто вас не ограничивает)
+
+### CSS
 
 Далее беремся за CSS.\
 Для обрезки гоала стоит использовать маски (как для сердца, так и для волны),
