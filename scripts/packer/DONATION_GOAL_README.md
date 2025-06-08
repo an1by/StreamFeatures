@@ -7,7 +7,7 @@ Donation Goal сделан специально для {client} ♥
 2. Переходим во вкладку `Settings`
    1. Переходим в папку `Donation Alerts`
    2. Вставляем ссылку на сбор средств с DonationAlerts в поле `Widget URL`
-3. Переходим по ссылке: https://raw.githubusercontent.com/an1by/StreamFeatures/refs/heads/master/guides/donation-goal/README.md
+3. Переходим по ссылке: https://raw.githubusercontent.com/an1by/StreamFeatures/refs/heads/master/guides/donation-goal/socket_connection_token.js
    1. Копируем все, что там есть
 4. Переходим по ссылке на сбор средств (ту же самую, что вставляли раньше)
    1. Открываем панель разработчика (обычно кнопка `F12`)
