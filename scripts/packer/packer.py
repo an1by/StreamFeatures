@@ -22,7 +22,7 @@ readmeText = (
 )
 
 # Forming ZIP
-zip_path = f"./{client}_donation_goal.zip"
+zip_path = f"./{client}_{widgetType.lower()}.zip"
 with zipfile.ZipFile(zip_path, "w") as zip:
     zip.write("index.html", "html.txt")
     zip.write("index.js", "js.txt")
